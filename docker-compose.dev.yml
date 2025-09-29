@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  # Base de données PostgreSQL pour le développement
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: peakview
+      POSTGRES_PASSWORD: supersecret
+      POSTGRES_DB: peakview_dev
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peakview -d peakview_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis pour le rate limiting (optionnel)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # pgAdmin pour gérer la base de données (optionnel)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@peakview.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  pgdata_dev:
