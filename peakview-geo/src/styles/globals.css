@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-midnight font-inter antialiased;
+}
+
+.card {
+  @apply rounded-card shadow-card bg-white border border-lightGray/60;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center px-5 py-3 rounded-card bg-pastelViolet text-white font-medium hover:animate-pulseSoft focus:outline-none focus:ring-2 focus:ring-pastelViolet/50;
+}
+
+.fade-in-up {
+  @apply animate-fadeInUp;
+}
