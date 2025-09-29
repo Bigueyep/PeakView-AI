@@ -51,3 +51,18 @@ Placeholder UI; branchez votre flux OAuth côté Google Cloud et stockez les tok
 - Palette: midnight #0F172A, blanc #FFFFFF, violet #7C3AED, gris #F3F4F6
 - Cards radius 8px, shadow douce, nav sticky, micro-animations
 
+### Déploiement Google Cloud (Cloud Run)
+- Activer Artifact Registry et Cloud Run dans votre projet GCP
+- Créer un repository docker: `gcloud artifacts repositories create peakview --repository-format=docker --location=europe-west1`
+- Définir variables de build (trigger Cloud Build): `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_PRICE_*`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_GOOGLE_ANALYTICS_CLIENT_ID`, `CORS_ORIGINS`
+- Lancer un build manuel:
+  - `gcloud builds submit --region=europe-west1 --config cloudbuild.yaml .`
+- Base de données (Cloud SQL Postgres):
+  - Créer une instance Postgres et une base `peakview_prod`
+  - Forme de `DATABASE_URL` (avec proxy Cloud SQL Auth):
+    `postgresql://USER:PASSWORD@/peakview_prod?host=/cloudsql/PROJECT:REGION:INSTANCE&schema=public`
+  - Attribuer au service Cloud Run le rôle `Cloud SQL Client` et ajouter la connexion dans le service Cloud Run
+- Migrations Prisma en prod:
+  - `gcloud run jobs create prisma-migrate --image <image> --region europe-west1 --set-env-vars=DATABASE_URL=... --command "npx" --args "prisma","migrate","deploy"`
+  - ou exécuter `npx prisma migrate deploy` via une étape Cloud Build dédiée
+
