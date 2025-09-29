@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  web:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npm run build && npm start"
+    volumes:
+      - .:/app
+    env_file:
+      - .env.production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-peakview}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-supersecret}
+      POSTGRES_DB: ${POSTGRES_DB:-peakview_prod}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  stripe-webhook:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npm run webhook"
+    volumes:
+      - .:/app
+    env_file:
+      - .env.production
+    ports:
+      - "4242:4242"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  pgdata:
